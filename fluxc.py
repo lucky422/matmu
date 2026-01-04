@@ -72,16 +72,19 @@ def build_cpu_so(py_file: Path, out_so: Path, M: int, K: int, N: int, fn_overrid
             "--linalg-generalize-named-ops",
             "--convert-linalg-to-loops",
         
-            # Canonical lowering
+            # Lower structured control flow
             "--lower-affine",
-            "--convert-scf-to-cf",
         
-            # Prepare for LLVM
+            # Direct SCF/CF → LLVM lowering
+            "--convert-scf-to-llvm",
+            "--convert-control-flow-to-llvm",
+        
+            # Data + math
             "--convert-arith-to-llvm",
             "--convert-math-to-llvm",
             "--expand-strided-metadata",
         
-            # Final LLVM conversion (this replaces convert-memref-to-llvm)
+            # Functions → LLVM
             "--convert-func-to-llvm",
             "--reconcile-unrealized-casts",
         
