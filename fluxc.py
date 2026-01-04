@@ -67,17 +67,27 @@ def build_cpu_so(py_file: Path, out_so: Path, M: int, K: int, N: int, fn_overrid
         run([
             "mlir-opt",
             str(in_mlir),
+        
+            # Linalg → loops
             "--linalg-generalize-named-ops",
             "--convert-linalg-to-loops",
+        
+            # Canonical lowering
             "--lower-affine",
             "--convert-scf-to-cf",
+        
+            # Prepare for LLVM
             "--convert-arith-to-llvm",
             "--convert-math-to-llvm",
-            "--convert-memref-to-llvm",
+            "--expand-strided-metadata",
+        
+            # Final LLVM conversion (this replaces convert-memref-to-llvm)
             "--convert-func-to-llvm",
             "--reconcile-unrealized-casts",
+        
             "-o", str(opt_mlir),
         ])
+
 
         run([
             "mlir-translate",
