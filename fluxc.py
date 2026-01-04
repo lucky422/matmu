@@ -68,28 +68,34 @@ def build_cpu_so(py_file: Path, out_so: Path, M: int, K: int, N: int, fn_overrid
             "mlir-opt",
             str(in_mlir),
         
-            # Linalg → loops
+            # Linalg → loops (SCF)
             "--linalg-generalize-named-ops",
             "--convert-linalg-to-loops",
         
-            # Lower structured control flow
+            # Canonical lowering
             "--lower-affine",
         
-            # Direct SCF/CF → LLVM lowering
-            "--convert-scf-to-llvm",
-            "--convert-control-flow-to-llvm",
+            # SCF → CF (your build supports this)
+            "--convert-scf-to-cf",
         
-            # Data + math
+            # CF → LLVM (your build supports this — critical!)
+            "--convert-cf-to-llvm",
+        
+            # Arithmetic/math → LLVM
             "--convert-arith-to-llvm",
             "--convert-math-to-llvm",
-            "--expand-strided-metadata",
         
-            # Functions → LLVM
+            # Memref lowering helpers (needed for descriptors + strides)
+            "--expand-strided-metadata",
+            "--finalize-memref-to-llvm",
+        
+            # Func → LLVM + cleanup
             "--convert-func-to-llvm",
             "--reconcile-unrealized-casts",
         
             "-o", str(opt_mlir),
         ])
+
 
 
         run([
